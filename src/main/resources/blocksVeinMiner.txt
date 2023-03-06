@@ -1,0 +1,17 @@
+idBlock;nomBlock;maxSize;
+1;coal_ore;64
+2;lapis_lazuli_ore;64
+3;iron_ore;64
+4;gold_ore;64
+5;redstone_ore;64
+6;diamond_ore;64
+7;emerald_ore;64
+8;deepslate_coal_ore;64
+9;deepslate_lapis_lazuli_ore;64
+10;deepslate_iron_ore;64
+11;deepslate_redstone_ore;64
+12;deepslate_diamond_ore;64
+13;deepslate_emerald_ore;64
+14;nether_quartz_ore;64
+15;nether_gold_ore;64
+16;ancient_debris;64
