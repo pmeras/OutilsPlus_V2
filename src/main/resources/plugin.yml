@@ -3,7 +3,11 @@ version: '${version}'
 main: outilsplus_v2.outilsplus_v2.outilsplus_v2
 api-version: 1.19
 commands:
-    giveitem:
-        description: Donne un objet avec NBT Tag précis
+    veinminer:
+        description: Donne une pioche pour le veinmining avec un NBT Tag précis
         usage: /<command>
-        permission: op
+        permission: outilsplusv2.veinminer
+    timberaxe:
+        description: Donne une hache pour le cassage en un coup  des arbres avec un NBT Tag précis
+        usage: /<command>
+        permission: outilsplusv2.timberaxe

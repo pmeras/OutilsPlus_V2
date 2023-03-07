@@ -26,12 +26,15 @@ import java.util.Queue;
 public class outilsplus_v2 extends JavaPlugin implements Listener, CommandExecutor
 {
     private final int MAX_BLOCKS_TO_MINE = 64;
-    private NamespacedKey customTag = new NamespacedKey(this, "veinMiner");
+    private NamespacedKey tagTimberAxe = new NamespacedKey(this, "timberAxe");
+    private NamespacedKey tagVeinMiner = new NamespacedKey(this, "veinMiner");
     private List<String[]> blocksVeinMiner = new ArrayList<>();
+    private List<String[]> blocksHoue = new ArrayList<>();
+    private List<String[]> blocksHache = new ArrayList<>();
 
     @Override
     public void onEnable() {
-        initCommande();
+        initOutils();
         getServer().getPluginManager().registerEvents(this, this);
         getLogger().info("outilsplus_v2 enabled!");
     }
@@ -42,8 +45,10 @@ public class outilsplus_v2 extends JavaPlugin implements Listener, CommandExecut
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().equalsIgnoreCase("giveitem")) {
-            if (sender instanceof Player) {
+        if (sender instanceof Player)
+        {
+            if (command.getName().equalsIgnoreCase("veinminer"))
+            {
                 Player player = (Player) sender;
 
                 // Create a new ItemStack with the Material of your choice
@@ -53,8 +58,28 @@ public class outilsplus_v2 extends JavaPlugin implements Listener, CommandExecut
                 ItemMeta meta = itemStack.getItemMeta();
 
                 // Add your custom NBT tag to the ItemStack
-                meta.setDisplayName("My Diamond Pickaxe");
-                meta.getPersistentDataContainer().set(customTag, PersistentDataType.STRING, "veinMiner");
+                meta.setDisplayName("Pioche du Mineur");
+                meta.getPersistentDataContainer().set(tagVeinMiner, PersistentDataType.STRING, "veinMiner");
+                itemStack.setItemMeta(meta);
+
+                // Give the ItemStack to the player
+                player.getInventory().addItem(itemStack);
+
+                return true;
+            }
+            else if (command.getName().equalsIgnoreCase("timberaxe"))
+            {
+                Player player = (Player) sender;
+
+                // Create a new ItemStack with the Material of your choice
+                ItemStack itemStack = new ItemStack(Material.DIAMOND_AXE);
+
+                // Set the display name of the ItemStack
+                ItemMeta meta = itemStack.getItemMeta();
+
+                // Add your custom NBT tag to the ItemStack
+                meta.setDisplayName("Hache du Bûcheron");
+                meta.getPersistentDataContainer().set(tagTimberAxe, PersistentDataType.STRING, "timberaxe");
                 itemStack.setItemMeta(meta);
 
                 // Give the ItemStack to the player
@@ -66,14 +91,14 @@ public class outilsplus_v2 extends JavaPlugin implements Listener, CommandExecut
         return false;
     }
 
-    private boolean hasCustomTag(Player player)
+    private boolean hasCustomTag(Player player, NamespacedKey tag)
     {
         ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
         if (meta == null)
         {
             return false;
         }
-        return meta.getPersistentDataContainer().has(customTag, PersistentDataType.STRING);
+        return meta.getPersistentDataContainer().has(tag, PersistentDataType.STRING);
     }
 
     @EventHandler
@@ -81,11 +106,32 @@ public class outilsplus_v2 extends JavaPlugin implements Listener, CommandExecut
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        for(int i = 1; i < blocksVeinMiner.size(); i++)
+        if (hasCustomTag(player, tagVeinMiner))
         {
-            if (blocksVeinMiner.get(i)[1].equals(block.getType().name().toLowerCase()))
+            for(int i = 1; i < blocksVeinMiner.size(); i++)
             {
-                if (hasCustomTag(player))
+                if (blocksVeinMiner.get(i)[1].equals(block.getType().name().toLowerCase()))
+                {
+                    ArrayList<Block> blocksToCheck = new ArrayList<>();
+                    getVein(block, block.getType(), blocksToCheck);
+                    int blocksMined = 0;
+                    for (Block b : blocksToCheck)
+                    {
+                        if (blocksMined >= MAX_BLOCKS_TO_MINE)
+                        {
+                            break;
+                        }
+                        b.breakNaturally(player.getInventory().getItemInMainHand());
+                        blocksMined++;
+                    }
+                }
+            }
+        }
+        else if(hasCustomTag(player, tagTimberAxe))
+        {
+            for(int i = 1; i < blocksHache.size(); i++)
+            {
+                if (blocksHache.get(i)[1].equals(block.getType().name().toLowerCase()))
                 {
                     ArrayList<Block> blocksToCheck = new ArrayList<>();
                     getVein(block, block.getType(), blocksToCheck);
@@ -127,17 +173,22 @@ public class outilsplus_v2 extends JavaPlugin implements Listener, CommandExecut
         }
     }
 
-    private void initCommande()
+    public void initOutils()
     {
         try
         {
-            List<String> tmp = Files.readAllLines(Paths.get(System.getProperty("user.dir"),"/plugins/config/blocksVeinMiner.txt").toAbsolutePath());
-            String tmpCut;
-            for(int i = 0;i < tmp.size();i++)
-            {
-                tmpCut = tmp.get(i);
-                blocksVeinMiner.add(i, tmpCut.split(";"));
-            }
+            List<String> tmp_blocksVeinMiner = Files.readAllLines(Paths.get(System.getProperty("user.dir"),"/plugins/config/blocksVeinMiner.txt").toAbsolutePath());
+            List<String> tmp_blocksHoue = Files.readAllLines(Paths.get(System.getProperty("user.dir"),"/plugins/config/blocksHoue.txt").toAbsolutePath());
+            List<String> tmp_blocksHache = Files.readAllLines(Paths.get(System.getProperty("user.dir"),"/plugins/config/blocksHache.txt").toAbsolutePath());
+
+            for(int j = 0; j < tmp_blocksVeinMiner.size(); j++)
+                blocksVeinMiner.add(j, tmp_blocksVeinMiner.get(j).split(";"));
+
+            for(int j = 0; j < tmp_blocksHoue.size(); j++)
+                blocksHoue.add(j, tmp_blocksHoue.get(j).split(";"));
+
+            for(int j = 0; j < tmp_blocksHache.size(); j++)
+                blocksHache.add(j, tmp_blocksHache.get(j).split(";"));
         }
         catch (IOException e)
         {
