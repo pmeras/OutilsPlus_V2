@@ -6,14 +6,16 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,6 +30,7 @@ public class outilsplus_v2 extends JavaPlugin implements Listener, CommandExecut
     private final int MAX_BLOCKS_TO_MINE = 64;
     private NamespacedKey tagTimberAxe = new NamespacedKey(this, "timberAxe");
     private NamespacedKey tagVeinMiner = new NamespacedKey(this, "veinMiner");
+    private NamespacedKey tagHoueFarmer = new NamespacedKey(this, "houeFarmer");
     private List<String[]> blocksVeinMiner = new ArrayList<>();
     private List<String[]> blocksHoue = new ArrayList<>();
     private List<String[]> blocksHache = new ArrayList<>();
@@ -87,6 +90,26 @@ public class outilsplus_v2 extends JavaPlugin implements Listener, CommandExecut
 
                 return true;
             }
+            else if (command.getName().equalsIgnoreCase("houefarmer"))
+            {
+                Player player = (Player) sender;
+
+                // Create a new ItemStack with the Material of your choice
+                ItemStack itemStack = new ItemStack(Material.DIAMOND_HOE);
+
+                // Set the display name of the ItemStack
+                ItemMeta meta = itemStack.getItemMeta();
+
+                // Add your custom NBT tag to the ItemStack
+                meta.setDisplayName("Houe du Fermier");
+                meta.getPersistentDataContainer().set(tagHoueFarmer, PersistentDataType.STRING, "houefarmer");
+                itemStack.setItemMeta(meta);
+
+                // Give the ItemStack to the player
+                player.getInventory().addItem(itemStack);
+
+                return true;
+            }
         }
         return false;
     }
@@ -102,7 +125,7 @@ public class outilsplus_v2 extends JavaPlugin implements Listener, CommandExecut
     }
 
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
+    public void onBlockInteract(BlockBreakEvent event) {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
@@ -145,6 +168,41 @@ public class outilsplus_v2 extends JavaPlugin implements Listener, CommandExecut
                         b.breakNaturally(player.getInventory().getItemInMainHand());
                         blocksMined++;
                     }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event)
+    {
+        Player player = event.getPlayer();
+        Block baseCenterBlock = event.getClickedBlock();
+
+        for(int i = 1; i < blocksHoue.size(); i++)
+        {
+            if(hasCustomTag(player, tagHoueFarmer))
+            {
+                if (blocksHoue.get(i)[1].equals(baseCenterBlock.getType().name().toLowerCase()))
+                {
+                    new BukkitRunnable() {
+                        @Override
+                        public void run()
+                        {
+                            for (int xOffset = -1; xOffset <= 1; xOffset++)
+                            {
+                                for (int zOffset = -1; zOffset <= 1; zOffset++)
+                                {
+                                    for(int i = 1; i < blocksHoue.size(); i++)
+                                    {
+                                        Block adjacentBlock = baseCenterBlock.getRelative(xOffset, 0, zOffset);
+                                        if(adjacentBlock.getType().name().toLowerCase().equals(blocksHoue.get(i)[1]))
+                                            adjacentBlock.setType(baseCenterBlock.getType());
+                                    }
+                                }
+                            }
+                        }
+                    }.runTaskLater(this, 1L);
                 }
             }
         }

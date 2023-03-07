@@ -11,3 +11,7 @@ commands:
         description: Donne une hache pour le cassage en un coup  des arbres avec un NBT Tag précis
         usage: /<command>
         permission: outilsplusv2.timberaxe
+    houefarmer:
+        description: Donne une houe pour l'utilisation en 3x3 en un coup des blocks grace a un NBT Tag précis
+        usage: /<command>
+        permission: outilsplusv2.houefarmer

@@ -1,8 +1,8 @@
 idBlock;nomBlock;dropItem;
-1;dirt;;
-2;grass_block;;
-3;podzol;;
-4;mycelium;;
+1;dirt;0;
+2;grass_block;0;
+3;podzol;0;
+4;mycelium;0;
 5;rooted_dirt;hanging_root;
-6;dirt_path;;
-7;coarse_dirt;;
+6;dirt_path;0;
+7;coarse_dirt;0;
